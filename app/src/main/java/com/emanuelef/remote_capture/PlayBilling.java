@@ -25,6 +25,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.ArrayMap;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,14 +57,27 @@ import com.android.billingclient.api.QueryProductDetailsResult;
 import com.android.billingclient.api.QueryPurchasesParams;
 import com.emanuelef.remote_capture.model.SkusAvailability;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -73,6 +87,21 @@ public class PlayBilling extends Billing implements BillingClientStateListener, 
     public static final String TAG = "PlayBilling";
     private static final String PREF_LAST_UNLOCK_TOKEN = "unlock_token";
     private static final String LICENSE_GEN_URL = "https://pcapdroid.org/getlicense";
+    private static final int PLAY_KEY_EXPONENT = 0x10001;
+
+    private static final int[] PLAY_KEY_DATA = {
+            0x3CADAFC9, 0xEF376BC6, 0x76DFCCC6, 0xA95CD75D, 0x866297B7, 0x3CC8EB80,
+            0x5BE53D69, 0x4F083AE9, 0xA38ED999, 0xDA0332EA, 0x3D1F412E, 0xA96EF0BE,
+            0xB925470E, 0x39B689F7, 0x71D5DCF4, 0x27572E1C, 0x081A624D, 0x9E4970DE,
+            0x35704706, 0x45EBEA5A, 0xBEA390D5, 0x566773B5, 0x2B713A59, 0xE9E1E87D,
+            0xCC2461FA, 0xF2D4A644, 0x4ED2F3CD, 0xAD3FEC89, 0x3D4810D9, 0xF85171A0,
+            0xB847FC8F, 0xCF01DAF3, 0x208C2A23, 0x22EB45B0, 0x16D944B6, 0xC9393AAC,
+            0xF73A94C7, 0x84A83235, 0xD834F2B8, 0xB861E11F, 0xBEC31AD7, 0xF3C364D8,
+            0xE60A2A72, 0x3BADDD4A, 0x031C423A, 0xBECB35FA, 0xF6853242, 0x5861CCE7,
+            0x84572B7E, 0x8B8F8655, 0xA0743A64, 0xE7778D60, 0x2744CAE7, 0x436D7AF1,
+            0x50B471BE, 0x82E67DEB, 0x38C80E7F, 0x6A7AE5A4, 0x663F4F64, 0xC5E841E8,
+            0xDA9A2144, 0x1A9F294A, 0xF61ABBD2, 0xA34F5EF5
+    };
     private final Handler mHandler;
     private final ArrayMap<String, ProductDetails> mDetails;
     private final ArrayMap<String, String> mSkuToPurchToken;
@@ -130,6 +159,50 @@ public class PlayBilling extends Billing implements BillingClientStateListener, 
         return res.getResponseCode() + "/" + res.getOnPurchasesUpdatedSubResponseCode() + " " + res.getDebugMessage();
     }
 
+    private static PublicKey getPlayKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        ByteBuffer modulus = ByteBuffer.allocate(PLAY_KEY_DATA.length * 4);
+        int mask = BuildConfig.APPLICATION_ID.hashCode();
+
+        for(int word: PLAY_KEY_DATA) {
+            mask = (mask * 0x41C64E6D) + 0x3039;
+            modulus.putInt(word ^ mask);
+        }
+
+        RSAPublicKeySpec spec = new RSAPublicKeySpec(new BigInteger(1, modulus.array()),
+                BigInteger.valueOf(PLAY_KEY_EXPONENT));
+
+        return KeyFactory.getInstance("RSA").generatePublic(spec);
+    }
+
+    private static void checkPurchaseSignature(Purchase purchase, boolean[] verified) {
+        String json = purchase.getOriginalJson();
+        String signature = purchase.getSignature();
+
+        verified[0] = false;
+
+        if(json.isEmpty() || signature.isEmpty())
+            return;
+
+        try {
+            PublicKey pk = getPlayKey();
+            Signature sig = Signature.getInstance("SHA1withRSA");
+            sig.initVerify(pk);
+            sig.update(json.getBytes(StandardCharsets.UTF_8));
+
+            if(!sig.verify(Base64.decode(signature, Base64.DEFAULT)))
+                return;
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException
+                 | SignatureException | IllegalArgumentException e) {
+            Log.e(TAG, "Purchase signature verification failed: " + e.getMessage());
+            return;
+        }
+
+        try {
+            JSONObject obj = new JSONObject(json);
+            verified[0] = BuildConfig.APPLICATION_ID.equals(obj.optString("packageName"));
+        } catch (JSONException ignored) {}
+    }
+
     // NOTE: processPurchases is called only with new purchases from onPurchasesUpdated (isFullList if false)
     private void processPurchases(BillingResult billingResult, @Nullable List<Purchase> purchases, boolean isFullList) {
         if((billingResult.getResponseCode() == BillingResponseCode.OK) && (purchases != null)) {
@@ -139,6 +212,15 @@ public class PlayBilling extends Billing implements BillingClientStateListener, 
 
             for(Purchase purchase : purchases) {
                 boolean newPurchase = false;
+                final boolean[] signed = {false};
+
+                checkPurchaseSignature(purchase, signed);
+                if(!signed[0]) {
+                    Log.w(TAG, "Discarding unverified purchase: " + purchase.getProducts());
+                    continue;
+                }
+
+                Log.d(TAG, "Purchase signature verified: " + purchase.getOrderId());
 
                 for(String sku: purchase.getProducts()) {
                     Log.d(TAG, "\tPurchase: " + sku + " -> " + purchstate2Str(purchase.getPurchaseState()));
