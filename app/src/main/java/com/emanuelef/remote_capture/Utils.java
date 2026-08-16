@@ -1268,7 +1268,7 @@ public class Utils {
 
     // NOTE: base32 padding not supported
     public static byte[] base32Decode(String s) {
-        s = s.toUpperCase().replace("\n", "");
+        s = s.toUpperCase(Locale.ROOT).replace("\n", "");
         byte[] rv = new byte[s.length() * 5 / 8];
         int i = 0;
         int bitsRemaining = 8;
@@ -1365,7 +1365,9 @@ public class Utils {
                 case "511140392BFF2CFB4BD825895DD6510CE1807F6D":
                     return BuildType.DEBUG;
                 case "EE953D4F988C8AC17575DFFAA1E3BBCE2E29E81D":
-                    return isPlaystore() ? BuildType.PLAYSTORE : BuildType.GITHUB;
+                    return isPlaystore() ? BuildType.PLAYSTORE : BuildType.UNKNOWN;
+                case "77DA81218F6E0D91220700317B2BCB906F4D4255":
+                    return BuildType.GITHUB;
                 case "72777D6939EF150099219BBB68C17220DB28EA8E":
                     return BuildType.FDROID;
             }
