@@ -78,7 +78,7 @@ In the blocklist tab, you can see the list of the blocking rules that you have d
 
 ### App isolation
 
-When installing untrusted apps, it's useful to block all the app traffic and only allow some specific hosts. In some other cases, e.g. for privacy reasons, you may want to only enable a minimal set of hosts to make the app work, while keeping the rest of analytics blocked. To do this, tap on an app entry in the *Blocklist* to access its *Allowlist*.
+When installing untrusted apps, it's useful to block all the app traffic and only allow some specific hosts. In some other cases, e.g. for privacy reasons, you may want to only enable a minimal set of hosts to make the app work, while keeping the rest of analytics blocked. To do this, first define a block rule for the app; this will block all the app traffic. Then tap on the app entry in the firewall *Blocklist* to access its *Allowlist*.
 
 <p align="center">
 <img src="./images/firewall_allowlist.png" width="250" />
