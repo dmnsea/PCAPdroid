@@ -13,6 +13,11 @@ In PCAPdroid you can tap on an HTTP connection to show its details, which includ
 In order to run without root, the app takes advantage of the Android [VpnService](https://developer.android.com/reference/android/net/VpnService) API to collect the packets on the device itself. No data leaves the device.
 <br/><br/>
 
+**I see the "unknown" app in PCAPdroid, is my device compromised?**
+
+No, it's normal to see an "unknown" app in PCAPdroid. PCAPdroid uses it to group the traffic which could not be correlated to a specific app. This usually happens for short-lived connections, which Android fails to map to a UID due to a limitation in its API.
+<br/><br/>
+
 **Can I capture the traffic of other devices in the network?**
 
 No. PCAPdroid only captures the traffic of the Android device where it is running.

@@ -26,11 +26,11 @@ If your installation ID changes, you will need to generate a new license code fo
 
 ## 5.1 Firewall
 
-**NOTE**: the firewall feature is not available with the [root capture](https://emanuele-f.github.io/PCAPdroid/advanced_features#44-root-capture)
+**NOTE**: the firewall feature is not available with the [root capture](advanced_features#44-root-capture)
 
 The firewall feature complements traffic visibility provided by PCAPdroid with the ability to block connections. This combination becomes a powerful tool to increase your privacy.
 
-Most apps implement some sort of analytics and periodically phone home, possibly sending out sensitive data. When monitoring traffic with PCAPdroid, you may have noticed that even some system apps like the camera or the photo gallery make connections to the Internet, which is at least unexpected. As most of the traffic is enrcrypted, it's not easy to determine what kind of information is sent to the remote server and if that connection is actually required to implement the app functionalities or it's only used to send out analytics.
+Most apps implement some sort of analytics and periodically phone home, possibly sending out sensitive data. When monitoring traffic with PCAPdroid, you may have noticed that even some system apps like the camera or the photo gallery make connections to the Internet, which is at least unexpected. As most of the traffic is encrypted, it's not easy to determine what kind of information is sent to the remote server and if that connection is actually required to implement the app functionalities or it's only used to send out analytics.
 
 PCAPdroid allows you to define your own set of rules to block Internet access to specific apps, domains or IP addresses. This gives you the flexibility to choose what to block, being it a whole app, if you determine that such app should not require Internet access, or specific domains, if the app needs Internet access to work correctly but you still want to block specific domains which you suspect may affect your privacy.
 
@@ -40,19 +40,9 @@ To create a block rule, long tap a connection in the Connections tab and choose 
 <img src="https://raw.githubusercontent.com/emanuele-f/PCAPdroid/gh-pages/images/firewall_block.jpg" width="250" />
 </p>
 
-The block rule will be applied both to the active connections and to the new connections. A *ban* sign helps you identify blocked connections. You can easily review all the blocked connections by tapping the filter icon in the action bar and appying a *Blocked by firewall* filter. You can unblock a connection by long pressing it and choosing *unblock* from the context menu. When unblocking an app, you can decide to unblock it permanently, by removing it from the blocklist, or give it a grace period and reblock it automatically after some hours. You can also review and delete the blocking rules from the blocklist tab as explained below.
+The block rule will be applied both to the active connections and to the new connections. A *ban* sign helps you identify blocked connections. You can easily review all the blocked connections by tapping the filter icon in the action bar and applying a *Firewall Blocked* filter. You can unblock a connection by long pressing it and choosing *unblock* from the context menu. When unblocking an app, you can decide to unblock it permanently, by removing it from the blocklist, or give it a grace period and reblock it automatically after some hours. You can also review and delete the blocking rules from the blocklist tab as explained below.
 
-From the left drawer, you can access the firewall settings and status.
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/emanuele-f/PCAPdroid/gh-pages/images/firewall_status.jpg" width="250" />
-</p>
-
-In the status tab you can see some statistics about the firewall, like the number of blocked connections and the time of the last block. Tap on the "Connections blocked" card to show the list of blocked connections. Via the on/off toggle in the action bar, you can enable/disable the firewall at runtime. From the action bar menu, you can also enable the ability to *block newly install apps*. This will automatically add new apps to the blocklist and block their traffic as soon as they are installed.
-
-In the blocklist tab you can see the set of blocking rules. You can long press rules to select and delete them. You can also export the rules to a file to backup them or share it with other people, who can add them to their existing rules.
-
-You can also block apps directly from the *Apps* view, by long pressing an app. Blocked apps can be visually identified via their *ban* sign.
+Blocked apps can be visually identified in the *Apps* view via their *ban* sign.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/emanuele-f/PCAPdroid/gh-pages/images/firewall_apps.jpg" width="250" />
@@ -65,12 +55,64 @@ When blocking an app, keep in mind the following:
 - The app may show locally cached content (e.g. a cached web page)
 - The app may still request downloads via the [Download Manager](https://developer.android.com/reference/android/app/DownloadManager)
 
+### Status and Blocklist
+
+From the left drawer, you can access the firewall settings and status.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/emanuele-f/PCAPdroid/gh-pages/images/firewall_status.jpg" width="250" />
+</p>
+
+In the status tab, you can see some statistics about the firewall, like the number of blocked connections and the time of the last block. Tap on the "Connections blocked" card to show the list of blocked connections.
+
+<p align="center">
+<img src="./images/firewall_menu.png" width="300" />
+</p>
+
+Via the on/off toggle in the action bar, you can enable/disable the firewall at runtime. From the action bar menu, you can also enable the ability to *block newly installed apps*. This will automatically add new apps to the blocklist and block their traffic as soon as they are installed. The *whitelist* mode can be toggled from here as well and it's explained below.
+
+<p align="center">
+<img src="./images/firewall_blocklist.png" width="250" />
+</p>
+
+In the blocklist tab, you can see the list of the blocking rules that you have defined. You can long press rules to select and delete them. You can also export the rules to a file to back them up or share them with other people, who can add them to their existing rules. By clicking the "+" button, you can add new rules directly from here.
+
+### App isolation
+
+When installing untrusted apps, it's useful to block all the app traffic and only allow some specific hosts. In some other cases, e.g. for privacy reasons, you may want to only enable a minimal set of hosts to make the app work, while keeping the rest of analytics blocked. To do this, tap on an app entry in the *Blocklist* to access its *Allowlist*.
+
+<p align="center">
+<img src="./images/firewall_allowlist.png" width="250" />
+</p>
+
+Here you can configure the set of IP addresses or domains that the app is allowed to contact.
+
+<p align="center">
+<img src="./images/firewall_allow_connection.png" width="300" />
+</p>
+
+You can also allow a host directly from the connections menu, by long pressing the connection and selecting "Allow for *app*..." and then what to allow.
+
+### Whitelist mode
+
+When the whitelist mode is enabled, all the app traffic is blocked by default, unless manually whitelisted. In essence, this is a "block all" mode, the opposite of the "allow all" mode that the firewall enables by default.
+
+This mode is suitable, for example, when you want to heavily save network data, e.g. during roaming, by only allowing specific apps to access the Internet, or you want strict control on your device traffic. This mode may also block important system services, e.g. update checks or instant messaging, so it must be used with care. After enabling it, be sure to check the blocked connections and monitor the device operations to be sure that nothing important breaks.
+
+<p align="center">
+<img src="./images/firewall_whitelist.png" width="250" />
+</p>
+
+The *whitelist* tab allows you to review and configure the allowed apps. Some apps like the Google Play services are allowed by default here since they are needed for some essential Android services to work correctly. The *root* app, in particular, includes many privileged system services that should not be blocked.
+
+In the whitelist mode, you can still configure block rules in the *blocklist* tab; block rules have precedence over the whitelist rules, so for example if an app is both in the *blocklist* and in the *whitelist*, it will be blocked. If you configure an allowed host in the *allowlist* of an app, it will be allowed like in the standard firewall mode, giving you max flexibility.
+
 
 ## 5.2 Malware Detection
 
 **DISCLAIMER**: *the malware detection feature of PCAPdroid is not a comprehensive solution for the security of your device. The author provides no guarantee on the malware detection capabilities or on the accuracy of PCAPdroid and he can not be held liable for any direct or indirect damage caused by its use.*
 
-The malware detection feature enables PCAPdroid to detect malicious hosts by the means of third-party blacklists. The detection is only active when the capture is running. Since version 1.4.5, when running in the default VPN mode, PCAPdroid will also **block** all the traffic directed to and coming from the malicious hosts. Blocking *does not occur* when running in [root mode](https://emanuele-f.github.io/PCAPdroid/advanced_features#44-root-capture).
+The malware detection feature enables PCAPdroid to detect malicious hosts by the means of third-party blacklists. The detection is only active when the capture is running. Since version 1.4.5, when running in the default VPN mode, PCAPdroid will also **block** all the traffic directed to and coming from the malicious hosts. Blocking *does not occur* when running in [root mode](advanced_features#44-root-capture).
 
 Today our devices are exposed to a variety of threats: phishing, online scams, ransomware and spyware to name a few. When it comes to security, precautions are never enough and no solution will fit all the needs. The malware detection feature of PCAPdroid can help detecting malicious connections as they happen, bringing the possible threat to the user attention, as well as preventing damage by blocking the communication. Here are some contexts where it finds applicability:
 
@@ -126,7 +168,12 @@ Finally the "Whitelist" tab show the rules which are part of the whitelist. If t
 
 ## 5.3 Pcapng Format
 
-Pcapng is an extensible file format for packet captures, an alternative to the traditional pcap format. In the context of PCAPdroid, pcapng comes handy when combined with the [TLS decryption](tls_decryption). In fact, pcapng supports embedding TLS master secrets directly into the dump, without the need for a separate SSLKEYLOG file. In essence, you can load a pcapng file generated by PCAPdroid in TLS decryption mode into Wireshark to see the decrypted data without any additional configuration.
+Pcapng is an extensible file format for packet captures, an alternative to the traditional pcap format.
+
+In the context of PCAPdroid, Pcapng comes handy because of the following reasons:
+
+- best storage for the [PCAPdroid extensions]: the extensions are stored as standard Pcapng extension blocks, instead of relying on "hacks" to store them in a fake Ethernet trailer. This also reduces the capture size
+- easy sharing of decrypted captures: when using the [TLS decryption](tls_decryption), PCAPdroid embeds the TLS master secrets directly into the Pcapng file, without the need to use a separate SSLKEYLOG file. This means, the keys always stay together with the related traffic, and you can just open the Pcapng file in Wireshark to get the decrypted traffic without any additional setup
 
 After purchasing the feature, you can enable it from the PCAPdroid preferences.
 

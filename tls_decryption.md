@@ -2,15 +2,19 @@
 
 PCAPdroid can decrypt the TLS traffic and display the decrypted payload directly into the app. Moreover, it can [generate a pcapng file](paid_features#53-pcapng-format), which you can load in tools like Wireshark to analyze the decrypted traffic.
 
-Most apps today employ TLS to secure their data against inspection and tampering. Such connections are reported in PCAPdroid with either the TLS or the HTTPS protocol. Decryption can be useful in the following contexts:
+Most apps today employ TLS to secure their data against inspection and tampering. These connections are reported in PCAPdroid with either the TLS or the HTTPS protocol.
+
+<p align="center">
+<img src="./images/https_connection.png" width="300" />
+</p>
+
+Decryption can be useful in the following contexts:
 
 - Check if an app transmits sensitive information or unhashed passwords
 - Reverse engineer the protocol of an app, e.g. to extract the REST API endpoints
-- Debug protocol-related issues without disabling the TLS encryption
+- Debug protocol-related issues without changing the protocol to an unencrypted one
 
 **Note**: before decrypting, you should check the app ToS to see if this is allowed
-
-**Note**: running TLS decryption will weaken the security of your app. You should only do this if you know what you are doing and for a limited amount of time
 
 Current limitations:
 
@@ -30,17 +34,26 @@ TLS decryption can be enabled from the PCAPdroid settings.
 The first time decryption is enabled, a setup wizard will help you properly setting up decryption. It includes the following steps:
 
 1. Download and installation of the [PCAPdroid-mitm addon](https://github.com/emanuele-f/PCAPdroid-mitm). The actual decryption is performed by [mitmproxy](https://github.com/mitmproxy/mitmproxy), which is bundled into the addon
-2. Permission to control the mitm addon. This is a security measure to prevent other apps from controlling the addon
-3. Installation of the PCAPdroid [CA certificate](https://docs.mitmproxy.org/stable/concepts-certificates). The CA certificate is what allows PCAPdroid to decrypt the app data, and to do so, it must first be added to the certificate store. To increase security, a unique CA is generated at runtime by PCAPdroid
+2. Installation of the PCAPdroid [CA certificate](https://docs.mitmproxy.org/stable/concepts-certificates). The CA certificate is what allows PCAPdroid to decrypt the app data, and to do so, it must first be added to the certificate store. To increase security, a unique CA is generated at runtime by PCAPdroid
 
 Before proceeding, check if your device has [Autostart](https://www.vivo.com/en/support/questionByTitle?title=How%20to%20turn%20on/off%20Autostart%20for%20my%20apps) or similar software which prevents background services execution, in which case you will need to whitelist the mitm addon, otherwise decryption will refuse to start.
 
 
 ## 3.3 Decrypting
 
-In order to decrypt connections, you first need to define some rules. You can do this either from the "Decryption rules" in the left drawer or by long pressing a connection and selecting a decryption criterion from the context menu. Please note that, due to Android security measures, decryption on common apps will not usually work, and will cause the apps to stop working. Read the section below to understand and possibly bypass these protections.
+In order to decrypt connections, you first need to define some rules. You can do this either from the "Decryption rules" in the left drawer or by long pressing a connection and selecting a decryption criterion from the context menu. Please note that, due to Android security measures, decryption on common apps will not usually work, and will cause the apps to stop working. Read the caveats section below to understand and possibly bypass these protections.
+
+Before starting the decryption, be sure to enable the "Full payload" option in the PCAPdroid settings, so that PCAPdroid can load the full decrypted data in memory.
+
+<p align="center">
+<img src="./images/full_payload_setting.png" width="300" />
+</p>
 
 The first test you should do to verify that decryption works is to choose an app which is easy to decrypt. It turns out Google Chrome is a good candidate. Enable decryption, select Google Chrome as the target app and then start the capture in PCAPdroid. In chrome, open a new tab and a new HTTPS website (or just clear the browser cache) and you should start seeing decrypted connections in PCAPdroid. These are marked with a green open lock.
+
+<p align="center">
+<img src="./images/decrypted_connection.png" width="300" />
+</p>
 
 The lock icon and color indicates the decryption status, which is also reported into the connection details:
 
@@ -58,9 +71,48 @@ If you tap on a decrypted connection, the payload and the HTTP tabs will show th
 <img src="https://raw.githubusercontent.com/emanuele-f/PCAPdroid/gh-pages/images/decryption_2.jpg" width="250" />
 </p>
 
-If the PCAP dump is enabled, after you stop the capture you will be prompted to save the `SSLKEYLOGFILE`, which you can load in Wireshark [to decrypt](https://wiki.wireshark.org/TLS#tls-decryption) the PCAP file. Alternatively, to simplify the process, you can embed the keylog [directly into the pcapng file](paid_features#53-pcapng-format).
+### 3.3.1 Inspecting HTTP requests
 
-### 3.3.1 Exclude specific hosts/ports
+Most of the apps communicate with their servers via HTTP-based APIs. PCAPdroid has a dedicated view for the HTTP traffic inspection, which you can activate by pressing the ⇄ icon next to the "Connections" tab header.
+
+**Note**: you need to enable the "Full payload" mode in order for this icon to appear
+
+<p align="center">
+<img src="./images/show_http_requests.png" width="300" />
+</p>
+
+<p align="center">
+<img src="./images/http_requests_view.png" width="250" />
+</p>
+
+In the HTTP requests view, you can see the individual HTTP requests data:
+
+- The host
+- The HTTP method (e.g. POST/GET) and the request path
+- The HTTP response code and status (e.g. "200 OK")
+- The content type (e.g. "application/json") of the HTTP response
+- The total size of the HTTP body
+
+The filter in the action bar allows you to filter requests by request method, content type, status and size.
+From the action bar, you can export the HTTP requests as text or as [HAR](https://en.wikipedia.org/wiki/HAR_(file_format)), which makes it convenient to analyze the requests with standard web tools, like the web-based [HAR Analyzer](https://toolbox.googleapps.com/apps/har_analyzer) from Google. To only export specific requests, long press one of the rows to activate the selection mode, then select the requests to export and finally choose "Save as HAR" from the action bar.
+
+You can tap an HTTP request to show the full request data and its related reply.
+
+<p align="center">
+<img src="./images/http_request_details.png" width="250" />
+</p>
+
+You can use the previous/next arrows in the action bar to easily move to the previous/next request.
+
+### 3.3.2 Analyze the decrypted traffic in Wireshark
+
+If the PCAP dump is enabled, PCAPdroid will store the packet capture under the `PCAPdroid` subfolder of the `Downloads` directory.
+
+- if you have the [Pcapng format](paid_features#53-pcapng-format) enabled, the capture already contains the decryption secrets embedded into it. You can open the Pcapng file directly in Wireshark and you will see the decrypted traffic
+
+- if the [Pcapng format](paid_features#53-pcapng-format) is disabled, when you stop the capture, PCAPdroid will store a keylog file next to the `.pcap` file, having the same name as the pcap file but with the `.keylog` extension. This file is the so called "SSLKEYLOGFILE" or "TLS (Pre)-Master-Secret log file" and it contains the decryption secrets, necessary to decrypt the captured traffic. To show the decrypted traffic in Wireshark, you will need to [configure the keylog path manually](https://wiki.wireshark.org/TLS#tls-decryption), under Edit -> Preferences -> Protocols -> TLS and only then open the pcap file
+
+### 3.3.3 Exclude specific hosts/ports
 
 Decryption rules already allow you to define what needs to be decrypted. However, in some cases it's easier to create a rule to decrypt a whole app and only exclude specific hosts or ports.
 For this you can use the mitmproxy [--ignore-hosts option](https://docs.mitmproxy.org/stable/howto-ignoredomains/#ignore_hosts), setting it in the "Additional mitmproxy options" in the PCAPdroid settings.
@@ -93,6 +145,8 @@ If you see the above error "*client does not trust proxy's certificate*" while d
 
 #### Using a rooted Android emulator
 
+**Note**: since PCAPdroid 2.0.0, you need an x86_64 or AArch64 emulator to run the mitm Addon. Older x86 emulators are not supported anymore
+
  - If you don't want to root your device or can't root it, you can try the same above steps on an Android emulator and it should give the same results. The recommendation for Android emulator is Android Studio's default virtual device manager as it will give you options of emulator with all sdk versions. Here is a [video tutorial](https://www.youtube.com/watch?v=QzsNn3GhYYk) on how to set up an Android emulator and root it
 
 #### Patching the APK
@@ -107,6 +161,16 @@ If you see the above error "*client does not trust proxy's certificate*" while d
 - If none of the above mentioned method works, then the app may use custom pinning logic, in which case you will need to decompile the app, analyse the code and then patch and rebuild it. Commonly used softwares for decompiling and patching apps are [JADX](https://github.com/skylot/jadx), [apktool](https://apktool.org/) or the [APKLab](https://github.com/APKLab/APKLab) extension in Visual studio code. Refer to this [blog post](https://braincoke.fr/blog/2021/03/android-reverse-engineering-for-beginners-decompiling-and-patching/) for a full guide on reverse-engineering and decompiling apps using the above tools. 
 - Along with patching an Android app, you could take help of tools like [Objection](https://github.com/sensepost/objection) and [Frida tools](https://github.com/frida/frida) to bypass ssl pinning.
 For a full guide on how to use these tools, you can refer to this [video tutorial](https://www.youtube.com/watch?v=R3ptGaFW1AU). Instead of using the Burp Suite as in the tutorial, you could instead use pcapdroid-mitm or an [external mitmproxy](https://github.com/emanuele-f/PCAPdroid/edit/gh-pages/tls_decryption.md#35-decrypting-via-an-external-mitmproxy), if you just want to decrypt TLS traffic
+- Some Flutter apps implement certificate pinning via the Flutter framework. Frida flutter unpinning modules like [disable-flutter-tls](https://github.com/NVISOsecurity/disable-flutter-tls-verification) usually do not work, because they require x64 libs whereas apps are usually only shipped with arm64 libs. For Flutter unpinning, one of the most effective frameworks is [reFlutter](https://github.com/ptswarm/reFlutter), which replaces the flutter libs in the apk with patched ones, disabling the certificate pinning
+- You cannot perform the SSO login with a modded apk, because of the different apk signature. A workaround is to perform the login with the original apk, backup the app data from the `/data/data/[package_name]` subfolder, then install the modded apk and restore the app data with the SSO login already done:
+    1. get the UID: `ls -ld /data/data/[package_name]`
+    2. `rm -rf /data/data/[package_name]`
+    3. `cp -r data_backup /data/data/[package_name]`
+    4. restore ownership (see UID from step 1) `chown -R u0_a429:u0_a429 /data/data/[package_name]`
+    5. restore cache ownership: `chown -R u0_a429:u0_a429_cache /data/data/[package_name]/{cache,code_cache}`
+    6. restore SELinux context: `restorecon -DRv /data/data/[package_name]`
+    7. start the app
+- The [app isolation](paid_features#app-isolation) feature of the PCAPdroid firewall is a good companion for reverse engineering. By only allowing the essential API endpoints of the target app, you can prevent possible reverse-engineering signals from reaching the analytics servers
 - You can also refer to the [OWASP mobile security](https://mas.owasp.org/MASTG/0x04c-Tampering-and-Reverse-Engineering/#references) website which has a repository of mobile application pen-testing and reverse-engineering [tools](https://mas.owasp.org/MASTG/tools/) discussed in-depth. You can refer to various OWASP uncrackable app tutorials on youtube for more insight.
 
 
