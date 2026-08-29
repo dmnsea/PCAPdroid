@@ -102,7 +102,7 @@ When running in non-root mode, PCAPdroid alters the network traffic, which is a 
 
 Moreover, in non-root mode, only outgoing connections (i.e. started by the Android device) are routed into the VPNService and captured. For a technical explanation of why this happens, check out the [how_it_works](https://github.com/emanuele-f/PCAPdroid/blob/master/docs/how_it_works.md) document.
 
-Please note that, even when capturing packets in root mode, the packets you see in the capture are not 1:1 with the real packets on the wire; for example, you may see packets much bigger than the interface MTU. This behaviour is not something specific of PCAPdroid or Android. It can occur because packets are usually aggregated by kernel/NIC offloading technologies like GSO, GRO and TSO. As a result, capture tools like PCAPdroid and tcpdump will see packets in their aggregated form rather than as the individual MTU-sized packets that are ultimately transmitted on the wire.
+Please note that, even when capturing packets in root mode, the packets you see in the capture are not 1:1 with the real packets on the wire; for example, you may see packets much bigger than the interface MTU. This behaviour is not something specific to PCAPdroid or Android. It can occur because packets are usually aggregated by kernel/NIC offloading technologies like GSO, GRO and TSO. As a result, capture tools like PCAPdroid and tcpdump will see packets in their aggregated form rather than as the individual MTU-sized packets that are ultimately transmitted on the wire.
 
 ## 1.5 Packet Captures
 
@@ -113,12 +113,12 @@ To capture traffic and store it into a PCAP/Pcapng file, you need to select "PCA
 </p>
 
 After starting the capture, the traffic will be recorded to a file under the `PCAPdroid` subfolder of the `Downloads` directory.
-After the capture is stopped, the capture will also appear in the "Last capture" section at the bottom of the screen, along with its size, the time when it was captured, its duration and an indication of the captured apps. Clicking "View all" will bring you to the Capture list screen.
+After the capture is stopped, it will also appear in the "Last capture" section at the bottom of the screen, along with its size, the time when it was captured, its duration and an indication of the captured apps. Clicking "View all" will bring you to the Capture list screen.
 
 <p align="center">
 <img src="./images/capture_list.png" width="250" />
 </p>
 
-The capture list gives you an overview of all the captures done previously and currently stored into the device storage. You can review the total storage used, rename or delete them in bulk. By clicking on a capture, you can load it back into PCAPdroid for analysis. A green open lock icon indicates that the capture contains decrypted traffic (see [TLS decryption](tls_decryption)).
+The capture list gives you an overview of all the captures done previously and currently stored on the device storage. You can review the total storage used, rename or delete them in bulk. By clicking on a capture, you can load it back into PCAPdroid for analysis. A green open lock icon indicates that the capture contains decrypted traffic (see [TLS decryption](tls_decryption)).
 
 For the best experience, consider purchasing the [Pcapng format](paid_features#53-pcapng-format). When enabled, it allows you to store additional metadata into the captures via the [PCAPdroid Extensions](advanced_features#45-pcapdroid-extensions), e.g. application UIDs, packet directions and the TLS master secrets used for the traffic decryption. This makes traffic analysis much easier, both in PCAPdroid itself and in external tools like Wireshark.

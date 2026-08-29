@@ -41,7 +41,7 @@ Before proceeding, check if your device has [Autostart](https://www.vivo.com/en/
 
 ## 3.3 Decrypting
 
-In order to decrypt connections, you first need to define some rules. You can do this either from the "Decryption rules" in the left drawer or by long pressing a connection and selecting a decryption criterion from the context menu. Please note that, due to Android security measures, decryption on common apps will not usually work, and will cause the apps to stop working. Read the caveats section below to understand and possibly bypass these protections.
+In order to decrypt connections, you first need to define some rules. You can do this either from the "Decryption rules" in the left drawer or by long pressing a connection and selecting a decryption criterion from the context menu. Please note that, due to Android security measures, decryption on common apps will not usually work, and will cause the apps to stop working. Read the [caveats section](#34-caveats-and-possible-solutions) below to understand and possibly bypass these protections.
 
 Before starting the decryption, be sure to enable the "Full payload" option in the PCAPdroid settings, so that PCAPdroid can load the full decrypted data in memory.
 
@@ -85,7 +85,7 @@ Most of the apps communicate with their servers via HTTP-based APIs. PCAPdroid h
 <img src="./images/http_requests_view.png" width="250" />
 </p>
 
-In the HTTP requests view, you can see the individual HTTP requests data:
+In the HTTP requests view, you can see the individual HTTP request data:
 
 - The host
 - The HTTP method (e.g. POST/GET) and the request path
@@ -102,7 +102,7 @@ You can tap an HTTP request to show the full request data and its related reply.
 <img src="./images/http_request_details.png" width="250" />
 </p>
 
-You can use the previous/next arrows in the action bar to easily move to the previous/next request.
+Use the previous/next arrows in the action bar to easily navigate to the previous/next request.
 
 ### 3.3.2 Analyze the decrypted traffic in Wireshark
 
@@ -145,7 +145,7 @@ If you see the above error "*client does not trust proxy's certificate*" while d
 
 #### Using a rooted Android emulator
 
-**Note**: since PCAPdroid 2.0.0, you need an x86_64 or AArch64 emulator to run the mitm Addon. Older x86 emulators are not supported anymore
+**Note**: since PCAPdroid 2.0.0, you need an x86_64 or AArch64 emulator to run the mitm addon. Older x86 emulators are not supported anymore
 
  - If you don't want to root your device or can't root it, you can try the same above steps on an Android emulator and it should give the same results. The recommendation for Android emulator is Android Studio's default virtual device manager as it will give you options of emulator with all sdk versions. Here is a [video tutorial](https://www.youtube.com/watch?v=QzsNn3GhYYk) on how to set up an Android emulator and root it
 

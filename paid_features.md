@@ -50,7 +50,7 @@ Blocked apps can be visually identified in the *Apps* view via their *ban* sign.
 
 When blocking an app, keep in mind the following:
 
-- The app will still be able to perform name resolution (DNS). In Android, the `netd` daemon performs name resolution in behalf of the apps, so it's not possible to determine which app made the DNS query
+- The app will still be able to perform name resolution (DNS). In Android, the `netd` daemon performs name resolution on behalf of the apps, so it's not possible to determine which app made the DNS query
 - The app may still communicate with Google services via IPC, e.g. receive push notifications and show ads
 - The app may show locally cached content (e.g. a cached web page)
 - The app may still request downloads via the [Download Manager](https://developer.android.com/reference/android/app/DownloadManager)
@@ -85,25 +85,25 @@ When installing untrusted apps, it's useful to block all the app traffic and onl
 <img src="./images/firewall_allowlist.png" width="250" />
 </p>
 
-Here you can configure the set of IP addresses or domains that the app is allowed to contact.
+Here you can configure the set of IP addresses or domains that the app is allowed to contact. You can also allow a host directly from the connections menu, by long pressing the connection and selecting "Allow for *app*..." and then what to allow.
 
 <p align="center">
 <img src="./images/firewall_allow_connection.png" width="300" />
 </p>
 
-You can also allow a host directly from the connections menu, by long pressing the connection and selecting "Allow for *app*..." and then what to allow.
-
 ### Whitelist mode
 
-When the whitelist mode is enabled, all the app traffic is blocked by default, unless manually whitelisted. In essence, this is a "block all" mode, the opposite of the "allow all" mode that the firewall enables by default.
+When the whitelist mode is enabled, all the device traffic is blocked by default, unless manually whitelisted. In essence, this is a "block all" mode, the opposite of the "allow all" mode that the firewall enables by default.
 
 This mode is suitable, for example, when you want to heavily save network data, e.g. during roaming, by only allowing specific apps to access the Internet, or you want strict control on your device traffic. This mode may also block important system services, e.g. update checks or instant messaging, so it must be used with care. After enabling it, be sure to check the blocked connections and monitor the device operations to be sure that nothing important breaks.
+
+The *whitelist* tab allows you to review and configure the allowed apps.
 
 <p align="center">
 <img src="./images/firewall_whitelist.png" width="250" />
 </p>
 
-The *whitelist* tab allows you to review and configure the allowed apps. Some apps like the Google Play services are allowed by default here since they are needed for some essential Android services to work correctly. The *root* app, in particular, includes many privileged system services that should not be blocked.
+Some apps like the Google Play services are allowed by default here since they are needed for some essential Android services to work correctly. The *root* app, in particular, includes many privileged system services that should not be blocked.
 
 In the whitelist mode, you can still configure block rules in the *blocklist* tab; block rules have precedence over the whitelist rules, so for example if an app is both in the *blocklist* and in the *whitelist*, it will be blocked. If you configure an allowed host in the *allowlist* of an app, it will be allowed like in the standard firewall mode, giving you max flexibility.
 
@@ -168,11 +168,9 @@ Finally the "Whitelist" tab show the rules which are part of the whitelist. If t
 
 ## 5.3 Pcapng Format
 
-Pcapng is an extensible file format for packet captures, an alternative to the traditional pcap format.
+Pcapng is an extensible file format for packet captures, an alternative to the traditional pcap format. In the context of PCAPdroid, Pcapng comes in handy because of the following reasons:
 
-In the context of PCAPdroid, Pcapng comes handy because of the following reasons:
-
-- best storage for the [PCAPdroid extensions]: the extensions are stored as standard Pcapng extension blocks, instead of relying on "hacks" to store them in a fake Ethernet trailer. This also reduces the capture size
+- best storage for the [PCAPdroid extensions](advanced_features#45-pcapdroid-extensions): the extensions are stored as standard Pcapng extension blocks, instead of relying on "hacks" to store them in a fake Ethernet trailer. This also reduces the capture size
 - easy sharing of decrypted captures: when using the [TLS decryption](tls_decryption), PCAPdroid embeds the TLS master secrets directly into the Pcapng file, without the need to use a separate SSLKEYLOG file. This means, the keys always stay together with the related traffic, and you can just open the Pcapng file in Wireshark to get the decrypted traffic without any additional setup
 
 After purchasing the feature, you can enable it from the PCAPdroid preferences.
