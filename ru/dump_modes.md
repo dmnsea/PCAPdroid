@@ -45,7 +45,7 @@ udp_receiver.py -p 1234 | wireshark -k -i -
 - Мониторинг активных соединений и их адресов в [ntopng](https://github.com/ntop/ntopng):
 
 ```bash
-udp_receiver.py -p 1234 | ntopng -m “10.215.173.0/24” -i -
+udp_receiver.py -p 1234 | ntopng -m "10.215.173.0/24" -i -
 ```
 
 - Запись трафика в PCAP-файл:

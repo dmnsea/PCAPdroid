@@ -3,7 +3,7 @@
 
 ## 3.1 Введение
 
-PCAPdroid can decrypt the TLS traffic and display the decrypted payload directly into the app. Moreover, it can [generate a pcapng file](paid_features#53-pcapng-format), which you can load in tools like Wireshark to analyze the decrypted traffic.
+PCAPdroid может расшифровывать TLS-трафик и отображать расшифрованные данные прямо в приложении. Кроме того, он может [создать файл pcapng](paid_features#53-формат-pcapng), который можно открыть в таких инструментах, как Wireshark, чтобы проанализировать расшифрованный трафик.
 
 Большинство приложений сегодня работают через TLS, чтобы защитить свои данные от наблюдения и изучения. Такие соединения в PCAPdroid помечаются как TLS, либо HTTPS протокол.
 Дешифрование может быть полезным в следующих случаях:
@@ -62,7 +62,7 @@ PCAPdroid can decrypt the TLS traffic and display the decrypted payload directly
 <img src="images/decrypted-content.png" width="250" />
 </p>
 
-Если запись дампа в PCAP включена, то по завершению захвата вы увидите запрос на сохранение `SSLKEYLOGFILE`, который вы можете загрузить в Wireshark [для дешифрования](https://wiki.wireshark.org/TLS#tls-decryption) PCAP файла. В качестве альтернативы, для упрощения процесса, можно использовать [формат дампа pcapng](paid_features#53-pcapng-format), в который `SSLKEYLOGFILE` встраивается напрямую.
+Если запись дампа в PCAP включена, то по завершению захвата вы увидите запрос на сохранение `SSLKEYLOGFILE`, который вы можете загрузить в Wireshark [для дешифрования](https://wiki.wireshark.org/TLS#tls-decryption) PCAP файла. В качестве альтернативы, для упрощения процесса, можно использовать [формат дампа pcapng](paid_features#53-формат-pcapng), в который `SSLKEYLOGFILE` встраивается напрямую.
 
 ### 3.3.1 Исключение определенных хостов/портов
 
@@ -84,7 +84,7 @@ Google Chrome является относительно простым для д
 
 Если вы видите ошибку *client does not trust the proxy's certificate* при дешифровании, это может случиться по следующим причинам:
 
-- Начиная с ОС Android 7, приложения с целевым Android SDK 23 и выше больше не доверяют любым пользовательским сертификатам и полагаются только на системные сертификаты, т.е. те, которые идут предустановленными на устройстве
+- Начиная с ОС Android 7, приложения с целевым Android SDK 24 и выше больше не доверяют любым пользовательским сертификатам и полагаются только на системные сертификаты, т.е. те, которые идут предустановленными на устройстве
 
 - Приложение может использовать свою внутреннюю базу корневых сертификатов. Некоторые приложения (преимущественно браузеры) реализуют кастомное хранилище доверенных сертификатов отдельно от системного. Это не даст им использовать какие-либо сертификаты из хранилища вашего устройства. Проверьте наличие возможности отключения такого хранилища. К примеру в Firefox [вы можете сделать это](https://support.mozilla.org/ru/questions/1304237) через `about:config`. Если подобной возможности нет, остается только патчить приложение.
 
@@ -92,7 +92,7 @@ Google Chrome является относительно простым для д
 
 #### Использование Android-устройства с root-доступом
 
-- На устройстве с root-правами и Magisk, вы можете установить [модуль Custom Certificate Authorities](https://github.com/whalehub/custom-certificate-authorities) (Android 11+) или [модуль MagiskTrustUserCerts](https://github.com/NVISOsecurity/MagiskTrustUserCerts), после чего установить [хешированный сертификат](https://docs.mitmproxy.org/stable/howto-install-system-trusted-ca-android/#instructions) (замените `mitmproxy-ca-cert.cer` на название сертификата от PCAPdroid) в качестве системного сертификата. Данное решение **рекомендуется** если у вас есть Magisk.
+- На устройстве с root-правами и Magisk, вы можете установить [модуль MagiskTrustUserCerts](https://github.com/NVISOsecurity/MagiskTrustUserCerts), после чего установить [хешированный сертификат](https://docs.mitmproxy.org/stable/howto-install-system-trusted-ca-android/#instructions) (замените `mitmproxy-ca-cert.cer` на название сертификата от PCAPdroid) в качестве системного сертификата. Данное решение **рекомендуется** если у вас есть Magisk.
 
 - На любом устройстве с root-правами вы можете установить сертификат [в системное хранилище](https://docs.mitmproxy.org/stable/howto-install-system-trusted-ca-android/#3-insert-certificate-into-system-certificate-store), предварительно примонтировав системный раздел в режиме `rw`
 
@@ -130,7 +130,7 @@ Google Chrome является относительно простым для д
 - Удалите корневой сертификат PCAPdroid из системного хранилища или просто временно выключите его из настроек безопасности в Android
 - Если корневой сертификат PCAPdroid установлен в системное хранилище посредством какого-либо Magisk-модуля, тогда вы можете использовать *magisk hide* на браузер, чтобы он распознавал сертификат PCAPdroid не как системный
 
-### 3.4.3 трафик все еще зашифрован
+### 3.4.3 Трафик все еще зашифрован
 
 После дешифрования TLS трафика, содержимое все еще может быть зашифровано с использованием других протоколов. Это происходит, в частности, с Telegram и Whatsapp, которые используют свой собственный протокол шифрования. Подобные протоколы требуют разработки собственных инструментов для дешифрования, что выходит за рамки PCAPdroid.
 
